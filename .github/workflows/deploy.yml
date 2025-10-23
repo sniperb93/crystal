@@ -1,0 +1,34 @@
+name: Deploy Crystal Agent to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Deploy to VPS
+      uses: appleboy/ssh-action@master
+      with:
+        host: 31.97.193.13
+        username: root
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          # Naviguer vers le répertoire de l'agent
+          cd /home/ubuntu/blaxing_agents/crystal
+          
+          # Tirer les dernières modifications
+          git pull origin main
+          
+          # Installer les dépendances Node.js (si elles ont changé)
+          /usr/bin/npm install
+          
+          # Redémarrer le service systemd
+          sudo systemctl restart crystal-agent.service
+
